@@ -56,7 +56,6 @@ pipeline:
         description: Deploy Kubernetes manifests to AKS
         type: Deployment
         spec:
-          deploymentType: Kubernetes
           serviceConfig:
             service:
               name: devops-harness-aks-service

@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: devops-harness-backend
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - backend-service.production.svc.cluster.local:8080
+        labels:
+          application: devops-harness-backend

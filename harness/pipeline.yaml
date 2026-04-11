@@ -10,11 +10,13 @@ pipeline:
         connectorRef: github_mukulnvm
         repoName: azure-aks-harness-devops
         build: <+input>
+
   stages:
+    # ========== CI STAGE ==========
     - stage:
         name: CI
         identifier: CI
-        description: Build and push backend and frontend images to ACR
+        description: "Build and push backend and frontend images to ACR"
         type: CI
         spec:
           cloneCodebase: true
@@ -38,6 +40,7 @@ pipeline:
                       - "1.0.0"
                     dockerfile: applications/backend/Dockerfile
                     context: applications/backend
+              
               - step:
                   type: BuildAndPushDockerRegistry
                   name: build_frontend
@@ -50,23 +53,23 @@ pipeline:
                     dockerfile: applications/frontend/Dockerfile
                     context: applications/frontend
 
+    # ========== CD STAGE ==========
     - stage:
         name: CD
         identifier: CD
-        description: Deploy Kubernetes manifests to AKS
+        description: "Deploy Kubernetes manifests to AKS production"
         type: Deployment
         spec:
           deploymentType: Kubernetes
-          serviceConfig:
-            service:
-              name: devops-harness-aks-service
-              identifier: devops_harness_aks_service
+          service:
+            name: devops-harness-aks-service
+            identifier: devops_harness_aks_service
             serviceDefinition:
               type: Kubernetes
               spec:
                 manifests:
                   - manifest:
-                      identifier: devops_harness_manifests
+                      identifier: manifests
                       type: K8sManifest
                       spec:
                         store:
@@ -78,39 +81,31 @@ pipeline:
                             branch: main
                             folderPath: kubernetes
                         skipResourceVersioning: false
-          infrastructure:
-            environment:
-              name: production
-              identifier: production
-              type: Production
+          environment:
+            name: production
+            identifier: production
+            type: Production
             infrastructureDefinition:
               type: KubernetesDirect
               spec:
                 connectorRef: aks_prod
                 namespace: production
                 releaseName: devops-harness-aks
-            allowSimultaneousDeployments: false
           execution:
             steps:
               - step:
+                  name: Deploy to AKS
+                  identifier: deploy_to_aks
                   type: K8sRollingDeploy
-                  name: rollout
-                  identifier: rollout
+                  timeout: 15m
                   spec:
                     skipDryRun: false
                     pruningEnabled: false
-                  timeout: 15m
             rollbackSteps:
               - step:
-                  type: K8sRollingRollback
-                  name: rollback
+                  name: Rollback
                   identifier: rollback
+                  type: K8sRollingRollback
+                  timeout: 10m
                   spec:
                     pruningEnabled: false
-                  timeout: 10m
-        failureStrategies:
-          - onFailure:
-              errors:
-                - AllErrors
-              action:
-                type: StageRollback

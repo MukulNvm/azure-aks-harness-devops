@@ -1,14 +1,14 @@
 pipeline:
   name: devops-harness-aks
   identifier: devops_harness_aks
-  projectIdentifier: YOUR_PROJECT_ID
-  orgIdentifier: YOUR_ORG_ID
+  projectIdentifier: devopsharnessaks
+  orgIdentifier: default
   tags: {}
   properties:
     ci:
       codebase:
-        connectorRef: YOUR_GITHUB_CONNECTOR_ID
-        repoName: YOUR_GITHUB_REPO_NAME
+        connectorRef: github_mukulnvm
+        repoName: azure-aks-harness-devops
         build: <+input>
   stages:
     - stage:
@@ -21,7 +21,7 @@ pipeline:
           infrastructure:
             type: KubernetesDirect
             spec:
-              connectorRef: YOUR_CI_K8S_CONNECTOR_ID
+              connectorRef: aks_ci
               namespace: harness-ci
               automountServiceAccountToken: true
               os: Linux
@@ -32,7 +32,7 @@ pipeline:
                   name: build_backend
                   identifier: build_backend
                   spec:
-                    connectorRef: YOUR_ACR_DOCKER_CONNECTOR_ID
+                    connectorRef: acr_devopsharnessy8v9wc
                     repo: acrdevopsharnessy8v9wc.azurecr.io/backend
                     tags:
                       - "1.0.0"
@@ -43,7 +43,7 @@ pipeline:
                   name: build_frontend
                   identifier: build_frontend
                   spec:
-                    connectorRef: YOUR_ACR_DOCKER_CONNECTOR_ID
+                    connectorRef: acr_devopsharnessy8v9wc
                     repo: acrdevopsharnessy8v9wc.azurecr.io/frontend
                     tags:
                       - "1.0.0"
@@ -72,11 +72,12 @@ pipeline:
                         store:
                           type: Github
                           spec:
-                            connectorRef: YOUR_GITHUB_CONNECTOR_ID
+                            connectorRef: github_mukulnvm
                             gitFetchType: Branch
-                            repoName: YOUR_GITHUB_REPO_NAME
+                            repoName: azure-aks-harness-devops
                             branch: main
                             folderPath: kubernetes
+                        skipResourceVersioning: false
           infrastructure:
             environment:
               name: production
@@ -85,7 +86,7 @@ pipeline:
             infrastructureDefinition:
               type: KubernetesDirect
               spec:
-                connectorRef: YOUR_AKS_CLUSTER_CONNECTOR_ID
+                connectorRef: aks_prod
                 namespace: production
                 releaseName: devops-harness-aks
             allowSimultaneousDeployments: false

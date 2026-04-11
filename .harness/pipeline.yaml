@@ -1,0 +1,115 @@
+pipeline:
+  name: devops-harness-aks
+  identifier: devops_harness_aks
+  projectIdentifier: YOUR_PROJECT_ID
+  orgIdentifier: YOUR_ORG_ID
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: YOUR_GITHUB_CONNECTOR_ID
+        repoName: YOUR_GITHUB_REPO_NAME
+        build: <+input>
+  stages:
+    - stage:
+        name: CI
+        identifier: CI
+        description: Build and push backend and frontend images to ACR
+        type: CI
+        spec:
+          cloneCodebase: true
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: YOUR_CI_K8S_CONNECTOR_ID
+              namespace: harness-ci
+              automountServiceAccountToken: true
+              os: Linux
+          execution:
+            steps:
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: build_backend
+                  identifier: build_backend
+                  spec:
+                    connectorRef: YOUR_ACR_DOCKER_CONNECTOR_ID
+                    repo: acrdevopsharnessy8v9wc.azurecr.io/backend
+                    tags:
+                      - "1.0.0"
+                    dockerfile: applications/backend/Dockerfile
+                    context: applications/backend
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: build_frontend
+                  identifier: build_frontend
+                  spec:
+                    connectorRef: YOUR_ACR_DOCKER_CONNECTOR_ID
+                    repo: acrdevopsharnessy8v9wc.azurecr.io/frontend
+                    tags:
+                      - "1.0.0"
+                    dockerfile: applications/frontend/Dockerfile
+                    context: applications/frontend
+
+    - stage:
+        name: CD
+        identifier: CD
+        description: Deploy Kubernetes manifests to AKS
+        type: Deployment
+        spec:
+          deploymentType: Kubernetes
+          serviceConfig:
+            service:
+              name: devops-harness-aks-service
+              identifier: devops_harness_aks_service
+            serviceDefinition:
+              type: Kubernetes
+              spec:
+                manifests:
+                  - manifest:
+                      identifier: devops_harness_manifests
+                      type: K8sManifest
+                      spec:
+                        store:
+                          type: Github
+                          spec:
+                            connectorRef: YOUR_GITHUB_CONNECTOR_ID
+                            gitFetchType: Branch
+                            repoName: YOUR_GITHUB_REPO_NAME
+                            branch: main
+                            folderPath: kubernetes
+          infrastructure:
+            environment:
+              name: production
+              identifier: production
+              type: Production
+            infrastructureDefinition:
+              type: KubernetesDirect
+              spec:
+                connectorRef: YOUR_AKS_CLUSTER_CONNECTOR_ID
+                namespace: production
+                releaseName: devops-harness-aks
+            allowSimultaneousDeployments: false
+          execution:
+            steps:
+              - step:
+                  type: K8sRollingDeploy
+                  name: rollout
+                  identifier: rollout
+                  spec:
+                    skipDryRun: false
+                    pruningEnabled: false
+                  timeout: 15m
+            rollbackSteps:
+              - step:
+                  type: K8sRollingRollback
+                  name: rollback
+                  identifier: rollback
+                  spec:
+                    pruningEnabled: false
+                  timeout: 10m
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback

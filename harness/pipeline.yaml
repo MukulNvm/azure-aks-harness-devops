@@ -83,7 +83,8 @@ pipeline:
                             gitFetchType: Branch
                             repoName: azure-aks-harness-devops
                             branch: main
-                            folderPath: kubernetes
+                            paths:
+                              - kubernetes
                         skipResourceVersioning: false
           infrastructure:
             environment:

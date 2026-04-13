@@ -38,6 +38,10 @@ pipeline:
                       - "1.0.0"
                     dockerfile: applications/backend/Dockerfile
                     context: applications/backend
+                    resources:
+                      limits:
+                        cpu: "1"
+                        memory: 1Gi
               - step:
                   type: BuildAndPushDockerRegistry
                   name: build_frontend
@@ -49,6 +53,10 @@ pipeline:
                       - "1.0.0"
                     dockerfile: applications/frontend/Dockerfile
                     context: applications/frontend
+                    resources:
+                      limits:
+                        cpu: "1"
+                        memory: 1Gi
 
     - stage:
         name: CD

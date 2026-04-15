@@ -1,0 +1,71 @@
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+# Install pnpm for workspace-aware installs.
+RUN npm install -g pnpm
+
+# Copy only the frontend and the shared client package it imports.
+COPY applications/frontend/ ./applications/frontend/
+COPY lib/api-client-react/ ./lib/api-client-react/
+
+# Create a minimal synthetic pnpm workspace for the frontend build.
+RUN cat > package.json <<'EOF'
+{
+  "name": "frontend-image-build",
+  "private": true,
+  "packageManager": "pnpm@9.15.0"
+}
+EOF
+
+RUN cat > pnpm-workspace.yaml <<'EOF'
+packages:
+  - "applications/frontend"
+  - "lib/api-client-react"
+catalog:
+  "@tailwindcss/vite": 4.2.2
+  "@tanstack/react-query": 5.99.0
+  "@types/node": 25.6.0
+  "@types/react": 19.2.14
+  "@types/react-dom": 19.2.3
+  "@vitejs/plugin-react": 6.0.1
+  "class-variance-authority": 0.7.1
+  clsx: 2.1.1
+  "framer-motion": 12.38.0
+  "lucide-react": 1.8.0
+  react: 19.2.5
+  "react-dom": 19.2.5
+  "tailwind-merge": 3.5.0
+  tailwindcss: 4.2.2
+  vite: 8.0.8
+  zod: 4.3.6
+EOF
+
+RUN cat > tsconfig.base.json <<'EOF'
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "baseUrl": "."
+  }
+}
+EOF
+
+ENV PORT=4173
+ENV BASE_PATH=/
+
+# Install workspace dependencies and build the frontend bundle.
+RUN pnpm install --no-frozen-lockfile
+WORKDIR /app/applications/frontend
+RUN pnpm run build
+
+FROM nginx:1.25-alpine
+COPY --from=builder /app/applications/frontend/dist/public /usr/share/nginx/html
+COPY applications/frontend/nginx.conf /etc/nginx/nginx.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

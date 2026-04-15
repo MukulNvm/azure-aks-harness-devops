@@ -1,0 +1,12 @@
+{
+  "name": "devops-harness-aks",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present run build",
+    "typecheck": "pnpm -r --if-present run typecheck"
+  }
+}

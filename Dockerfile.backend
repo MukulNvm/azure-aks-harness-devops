@@ -1,0 +1,44 @@
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+# Install pnpm for workspace-aware installs.
+RUN npm install -g pnpm
+
+# Copy only the backend and the shared libraries it depends on.
+COPY applications/backend/ ./applications/backend/
+COPY lib/api-zod/ ./lib/api-zod/
+COPY lib/db/ ./lib/db/
+
+# Create a minimal synthetic pnpm workspace for the backend build.
+RUN cat > package.json <<'EOF'
+{
+  "name": "backend-image-build",
+  "private": true,
+  "packageManager": "pnpm@9.15.0"
+}
+EOF
+
+RUN cat > pnpm-workspace.yaml <<'EOF'
+packages:
+  - "applications/backend"
+  - "lib/api-zod"
+  - "lib/db"
+catalog:
+  drizzle-orm: 0.45.1
+  zod: 4.0.17
+  "@types/node": 25.3.5
+EOF
+
+# Install workspace dependencies and build the backend bundle.
+RUN pnpm install --no-frozen-lockfile
+WORKDIR /app/applications/backend
+RUN pnpm run build
+
+FROM node:20-alpine
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/applications/backend/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/applications/backend/package.json ./package.json
+EXPOSE 8080
+CMD ["node", "dist/index.mjs"]

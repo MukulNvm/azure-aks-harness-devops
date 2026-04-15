@@ -1,13 +1,15 @@
-FROM node:20-alpine
-
+# Dockerfile for new Express + TypeScript API
+FROM node:20-alpine AS build
 WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm install --frozen-lockfile || npm install
+COPY . .
+RUN npm run build
 
-COPY package.json ./
-RUN npm install --omit=dev
-
-COPY server.js ./
-
-ENV PORT=8080
+FROM node:20-alpine AS prod
+WORKDIR /app
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package.json ./
+COPY --from=build /app/node_modules ./node_modules
 EXPOSE 8080
-
-CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]

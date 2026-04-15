@@ -1,0 +1,450 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: users
+    description: User operations
+  - name: metrics
+    description: Metrics operations
+  - name: logs
+    description: Request log operations
+  - name: deployments
+    description: Deployment history
+  - name: infrastructure
+    description: Infrastructure status
+  - name: incidents
+    description: Incident timeline
+  - name: alerts
+    description: Alert thresholds
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List users
+      responses:
+        "200":
+          description: Users list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserList"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDetail"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+  /metrics:
+    get:
+      operationId: getMetrics
+      tags: [metrics]
+      summary: Get metrics
+      responses:
+        "200":
+          description: Prometheus metrics text
+          content:
+            text/plain:
+              schema:
+                type: string
+  /request-logs:
+    get:
+      operationId: getRequestLogs
+      tags: [logs]
+      summary: Get recent request logs
+      responses:
+        "200":
+          description: Request logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestLogList"
+  /deployments:
+    get:
+      operationId: getDeployments
+      tags: [deployments]
+      summary: Get deployment history
+      responses:
+        "200":
+          description: Deployments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeploymentList"
+  /pods:
+    get:
+      operationId: getPods
+      tags: [infrastructure]
+      summary: Get pod/node health
+      responses:
+        "200":
+          description: Pod status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PodList"
+  /incidents:
+    get:
+      operationId: getIncidents
+      tags: [incidents]
+      summary: Get incident timeline
+      responses:
+        "200":
+          description: Incidents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IncidentList"
+  /alerts/config:
+    get:
+      operationId: getAlertConfig
+      tags: [alerts]
+      summary: Get alert thresholds
+      responses:
+        "200":
+          description: Alert config
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlertConfig"
+    put:
+      operationId: updateAlertConfig
+      tags: [alerts]
+      summary: Update alert thresholds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlertConfig"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlertConfig"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+        service:
+          type: ["string", "null"]
+        timestamp:
+          type: ["string", "null"]
+      required:
+        - status
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        role:
+          type: string
+      required:
+        - id
+        - name
+        - role
+    UserDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        role:
+          type: string
+        email:
+          type: string
+        lastLogin:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        activityLog:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityEntry"
+      required:
+        - id
+        - name
+        - role
+        - email
+        - createdAt
+        - activityLog
+    ActivityEntry:
+      type: object
+      properties:
+        timestamp:
+          type: string
+        action:
+          type: string
+        detail:
+          type: string
+      required:
+        - timestamp
+        - action
+        - detail
+    CreateUserBody:
+      type: object
+      properties:
+        name:
+          type: string
+        role:
+          type: string
+        email:
+          type: string
+      required:
+        - name
+        - role
+        - email
+    UpdateUserBody:
+      type: object
+      properties:
+        name:
+          type: string
+        role:
+          type: string
+        email:
+          type: string
+    UserList:
+      type: array
+      items:
+        $ref: "#/components/schemas/User"
+    RequestLog:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+        method:
+          type: string
+        route:
+          type: string
+        statusCode:
+          type: integer
+        latencyMs:
+          type: number
+        userAgent:
+          type: string
+      required:
+        - id
+        - timestamp
+        - method
+        - route
+        - statusCode
+        - latencyMs
+    RequestLogList:
+      type: array
+      items:
+        $ref: "#/components/schemas/RequestLog"
+    Deployment:
+      type: object
+      properties:
+        id:
+          type: string
+        version:
+          type: string
+        timestamp:
+          type: string
+        status:
+          type: string
+        environment:
+          type: string
+        pipeline:
+          type: string
+        commitHash:
+          type: string
+        author:
+          type: string
+        duration:
+          type: integer
+      required:
+        - id
+        - version
+        - timestamp
+        - status
+        - environment
+        - pipeline
+    DeploymentList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Deployment"
+    Pod:
+      type: object
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+        restarts:
+          type: integer
+        cpuPercent:
+          type: number
+        memoryMb:
+          type: number
+        node:
+          type: string
+        age:
+          type: string
+        namespace:
+          type: string
+      required:
+        - name
+        - status
+        - restarts
+        - cpuPercent
+        - memoryMb
+        - node
+        - age
+        - namespace
+    PodList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Pod"
+    Incident:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        severity:
+          type: string
+        status:
+          type: string
+        startedAt:
+          type: string
+        resolvedAt:
+          type: ["string", "null"]
+        durationMinutes:
+          type: ["integer", "null"]
+        rootCause:
+          type: ["string", "null"]
+      required:
+        - id
+        - title
+        - severity
+        - status
+        - startedAt
+    IncidentList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Incident"
+    AlertConfig:
+      type: object
+      properties:
+        errorRateWarning:
+          type: number
+        errorRateCritical:
+          type: number
+        latencyP95Warning:
+          type: number
+        latencyP95Critical:
+          type: number
+        podRestartWarning:
+          type: integer
+        podRestartCritical:
+          type: integer
+      required:
+        - errorRateWarning
+        - errorRateCritical
+        - latencyP95Warning
+        - latencyP95Critical
+        - podRestartWarning
+        - podRestartCritical

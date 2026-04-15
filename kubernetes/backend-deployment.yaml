@@ -7,6 +7,11 @@ metadata:
     app: backend
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: backend
@@ -19,21 +24,25 @@ spec:
         prometheus.io/path: /metrics
         prometheus.io/port: "8080"
     spec:
+      serviceAccountName: backend-dashboard-reader
       containers:
         - name: backend
-          image: acrdevopsharnessy8v9wc.azurecr.io/backend:1.0.0
+          image: acrdevopsharnessy8v9wc.azurecr.io/backend:latest
           imagePullPolicy: Always
+          env:
+            - name: PORT
+              value: "8080"
           ports:
             - containerPort: 8080
           readinessProbe:
             httpGet:
-              path: /health
+              path: /api/healthz
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /health
+              path: /api/healthz
               port: 8080
             initialDelaySeconds: 20
             periodSeconds: 15

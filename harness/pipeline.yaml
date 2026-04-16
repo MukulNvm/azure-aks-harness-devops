@@ -36,8 +36,8 @@ pipeline:
                     repo: acrdevopsharnessy8v9wc.azurecr.io/backend
                     tags:
                       - "1.0.0"
-                    dockerfile: applications/backend/Dockerfile
-                    context: applications/backend
+                    dockerfile: Dockerfile.backend
+                    context: .
                     resources:
                       limits:
                         cpu: "1"
@@ -51,8 +51,8 @@ pipeline:
                     repo: acrdevopsharnessy8v9wc.azurecr.io/frontend
                     tags:
                       - "1.0.0"
-                    dockerfile: applications/frontend/Dockerfile
-                    context: applications/frontend
+                    dockerfile: Dockerfile.frontend
+                    context: .
                     resources:
                       limits:
                         cpu: "1"

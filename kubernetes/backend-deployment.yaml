@@ -21,13 +21,13 @@ spec:
         app: backend
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/path: /metrics
+        prometheus.io/path: /api/metrics
         prometheus.io/port: "8080"
     spec:
       serviceAccountName: backend-dashboard-reader
       containers:
         - name: backend
-          image: acrdevopsharnessy8v9wc.azurecr.io/backend:latest
+          image: acrdevopsharnessy8v9wc.azurecr.io/backend:<+artifact.tag>
           imagePullPolicy: Always
           env:
             - name: PORT

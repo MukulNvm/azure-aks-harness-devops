@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: acrdevopsharnessy8v9wc.azurecr.io/frontend:latest
+          image: acrdevopsharnessy8v9wc.azurecr.io/frontend:<+artifact.tag>
           imagePullPolicy: Always
           ports:
             - containerPort: 80

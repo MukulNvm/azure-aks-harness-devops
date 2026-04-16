@@ -11,22 +11,7 @@ interface KpiCardsProps {
   metrics: ParsedMetrics;
   isMetricsLoading: boolean;
   uptimeSeconds: number | null;
-  environment: string;
 }
-
-const ENV_MULTIPLIERS: Record<string, { requests: number; errorRate: number; uptime: number }> = {
-  all: { requests: 1, errorRate: 1, uptime: 1 },
-  production: { requests: 1, errorRate: 1, uptime: 1 },
-  staging: { requests: 0.3, errorRate: 1.8, uptime: 0.7 },
-  dev: { requests: 0.1, errorRate: 3.2, uptime: 0.3 },
-};
-
-const ENV_SERVICE_NAMES: Record<string, string> = {
-  all: "devops-harness-aks",
-  production: "devops-harness-aks",
-  staging: "staging.devops-harness",
-  dev: "dev.devops-harness",
-};
 
 const CARD_GRADIENTS = [
   "from-primary/10 via-purple-500/5 to-transparent",
@@ -45,15 +30,13 @@ export default function KpiCards({
   metrics,
   isMetricsLoading,
   uptimeSeconds,
-  environment,
 }: KpiCardsProps) {
-  const mul = ENV_MULTIPLIERS[environment] || ENV_MULTIPLIERS.all;
   const isSystemHealthy = healthStatus?.status === "ok";
-  const serviceName = ENV_SERVICE_NAMES[environment] || ENV_SERVICE_NAMES.all;
+  const serviceName = healthStatus?.service || "unknown-service";
 
-  const adjustedTotals = Math.round(metrics.totals * mul.requests);
-  const adjustedErrorRate = metrics.errorRate * mul.errorRate;
-  const adjustedUptime = uptimeSeconds !== null ? Math.round(uptimeSeconds * mul.uptime) : null;
+  const totalRequests = Math.round(metrics.totals);
+  const errorRate = metrics.errorRate;
+  const uptime = uptimeSeconds !== null ? Math.round(uptimeSeconds) : null;
 
   const formatUptime = (seconds: number | null): string => {
     if (seconds === null || seconds === undefined) return "--";
@@ -88,7 +71,7 @@ export default function KpiCards({
       title: "Total Requests",
       icon: BarChart3,
       iconColor: "text-primary",
-      value: adjustedTotals.toLocaleString(),
+      value: totalRequests.toLocaleString(),
       subtitle: "HTTP requests total",
       loading: isMetricsLoading,
       gradient: CARD_GRADIENTS[2],
@@ -96,9 +79,9 @@ export default function KpiCards({
     {
       title: "Error Rate",
       icon: AlertTriangle,
-      iconColor: adjustedErrorRate > 5 ? "text-red-400" : (adjustedErrorRate > 1 ? "text-amber-400" : "text-emerald-400"),
-      value: `${adjustedErrorRate.toFixed(2)}%`,
-      subtitle: adjustedErrorRate > 2 ? "above threshold" : "within normal",
+      iconColor: errorRate > 5 ? "text-red-400" : (errorRate > 1 ? "text-amber-400" : "text-emerald-400"),
+      value: `${errorRate.toFixed(2)}%`,
+      subtitle: errorRate > 2 ? "above threshold" : "within normal",
       loading: isMetricsLoading,
       gradient: CARD_GRADIENTS[3],
     },
@@ -106,7 +89,7 @@ export default function KpiCards({
       title: "Uptime",
       icon: Clock,
       iconColor: "text-emerald-400",
-      value: formatUptime(adjustedUptime),
+      value: formatUptime(uptime),
       subtitle: "continuous uptime",
       loading: isMetricsLoading,
       gradient: CARD_GRADIENTS[4],

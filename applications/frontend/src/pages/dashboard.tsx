@@ -9,12 +9,16 @@ import {
   useGetRequestLogs,
   getGetRequestLogsQueryKey,
   useGetDeployments,
+  getGetDeploymentsQueryKey,
   useGetPods,
+  getGetPodsQueryKey,
   useGetIncidents,
+  getGetIncidentsQueryKey,
   useGetAlertConfig,
   getGetAlertConfigQueryKey,
   useUpdateAlertConfig,
   useGetUser,
+  getGetUserQueryKey,
   useCreateUser,
   useUpdateUser,
   useDeleteUser,
@@ -60,55 +64,97 @@ export default function Dashboard({ isDark, onToggleTheme }: DashboardProps) {
   const [editUserData, setEditUserData] = useState<{ name: string; email: string; role: string } | undefined>();
   const [editUserId, setEditUserId] = useState<number | null>(null);
 
-  const queryOptions = { refetchInterval: REFRESH_INTERVAL };
-
   const {
     data: healthStatus,
     isLoading: isHealthLoading,
     isError: isHealthError,
     refetch: refetchHealth,
-  } = useHealthCheck({ query: queryOptions });
+  } = useHealthCheck({
+    query: {
+      queryKey: getHealthCheckQueryKey(),
+      refetchInterval: REFRESH_INTERVAL,
+    },
+  });
 
   const {
     data: users,
     isLoading: isUsersLoading,
-  } = useListUsers({ query: queryOptions });
+  } = useListUsers({
+    query: {
+      queryKey: getListUsersQueryKey(),
+      refetchInterval: REFRESH_INTERVAL,
+    },
+  });
 
   const {
     data: metricsText,
     isLoading: isMetricsLoading,
-  } = useGetMetrics({ query: queryOptions });
+  } = useGetMetrics({
+    query: {
+      queryKey: getGetMetricsQueryKey(),
+      refetchInterval: REFRESH_INTERVAL,
+    },
+  });
 
   const {
     data: requestLogs,
     isLoading: isLogsLoading,
-  } = useGetRequestLogs({ query: { refetchInterval: LOG_REFRESH_INTERVAL } });
+  } = useGetRequestLogs({
+    query: {
+      queryKey: getGetRequestLogsQueryKey(),
+      refetchInterval: LOG_REFRESH_INTERVAL,
+    },
+  });
 
   const {
     data: deployments,
     isLoading: isDeploymentsLoading,
-  } = useGetDeployments({ query: queryOptions });
+  } = useGetDeployments({
+    query: {
+      queryKey: getGetDeploymentsQueryKey(),
+      refetchInterval: REFRESH_INTERVAL,
+    },
+  });
 
   const {
     data: pods,
     isLoading: isPodsLoading,
-  } = useGetPods({ query: queryOptions });
+    isError: isPodsError,
+  } = useGetPods({
+    query: {
+      queryKey: getGetPodsQueryKey(),
+      refetchInterval: REFRESH_INTERVAL,
+    },
+  });
 
   const {
     data: incidents,
     isLoading: isIncidentsLoading,
-  } = useGetIncidents({ query: queryOptions });
+  } = useGetIncidents({
+    query: {
+      queryKey: getGetIncidentsQueryKey(),
+      refetchInterval: REFRESH_INTERVAL,
+    },
+  });
 
   const {
     data: alertConfig,
     isLoading: isAlertConfigLoading,
-  } = useGetAlertConfig({ query: queryOptions });
+  } = useGetAlertConfig({
+    query: {
+      queryKey: getGetAlertConfigQueryKey(),
+      refetchInterval: REFRESH_INTERVAL,
+    },
+  });
 
   const {
     data: userDetail,
     isLoading: isUserDetailLoading,
   } = useGetUser(detailUserId || 0, {
-    query: { enabled: detailUserId !== null },
+    query: {
+      queryKey: getGetUserQueryKey(detailUserId || 0),
+      enabled: detailUserId !== null,
+    },
   });
 
   const createUserMutation = useCreateUser({
@@ -254,7 +300,6 @@ export default function Dashboard({ isDark, onToggleTheme }: DashboardProps) {
           metrics={metrics}
           isMetricsLoading={isMetricsLoading}
           uptimeSeconds={metrics.uptimeSeconds}
-          environment={environment}
         />
 
         <TrafficCharts metrics={metrics} isLoading={isMetricsLoading} />
@@ -296,6 +341,9 @@ export default function Dashboard({ isDark, onToggleTheme }: DashboardProps) {
               healthStatus={healthStatus}
               isHealthLoading={isHealthLoading}
               isHealthError={isHealthError}
+              isPodsLoading={isPodsLoading}
+              isPodsError={isPodsError}
+              hasPodsData={pods !== undefined}
               metricsAvailable={!!metricsText}
               isMetricsLoading={isMetricsLoading}
               onRetryHealth={() => refetchHealth()}

@@ -7,6 +7,9 @@ interface ReliabilityPanelProps {
   healthStatus: { status: string; service?: string | null; timestamp?: string | null } | undefined;
   isHealthLoading: boolean;
   isHealthError: boolean;
+  isPodsLoading: boolean;
+  isPodsError: boolean;
+  hasPodsData: boolean;
   metricsAvailable: boolean;
   isMetricsLoading: boolean;
   onRetryHealth: () => void;
@@ -44,11 +47,15 @@ export default function ReliabilityPanel({
   healthStatus,
   isHealthLoading,
   isHealthError,
+  isPodsLoading,
+  isPodsError,
+  hasPodsData,
   metricsAvailable,
   isMetricsLoading,
   onRetryHealth,
 }: ReliabilityPanelProps) {
   const isSystemHealthy = healthStatus?.status === "ok";
+  const isKubernetesReachable = hasPodsData && !isPodsError;
 
   return (
     <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden">
@@ -66,11 +73,11 @@ export default function ReliabilityPanel({
             offlineText="OFFLINE"
           />
           <StatusBadge
-            label="Database"
-            isLoading={isHealthLoading}
-            isOnline={isSystemHealthy}
-            onlineText="CONNECTED"
-            offlineText="DISCONNECTED"
+            label="Kubernetes API"
+            isLoading={isPodsLoading}
+            isOnline={isKubernetesReachable}
+            onlineText="REACHABLE"
+            offlineText="UNREACHABLE"
           />
           <StatusBadge
             label="Metrics Engine"

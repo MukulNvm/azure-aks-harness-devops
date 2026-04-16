@@ -38,6 +38,7 @@ export default function IncidentTimeline({ incidents, isLoading, environmentFilt
     !environmentFilter || environmentFilter === "all" ? true : i.environment === environmentFilter
   );
   const activeCount = filtered?.filter(i => i.status !== "resolved").length || 0;
+  const resolvedCount = (filtered?.length || 0) - activeCount;
 
   return (
     <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm p-6">
@@ -47,7 +48,11 @@ export default function IncidentTimeline({ incidents, isLoading, environmentFilt
           Incident Timeline
         </h3>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {activeCount > 0 ? `${activeCount} active incident${activeCount > 1 ? "s" : ""}` : "No active incidents"}
+          {activeCount > 0
+            ? `${activeCount} active incident${activeCount > 1 ? "s" : ""}`
+            : resolvedCount > 0
+              ? `No active incidents (${resolvedCount} resolved in history)`
+              : "No incidents recorded"}
         </p>
       </div>
       {isLoading ? (

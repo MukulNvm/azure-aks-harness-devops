@@ -33,6 +33,7 @@ export default function PodHealth({ pods, isLoading, environmentFilter }: PodHea
     !environmentFilter || environmentFilter === "all" ? true : p.environment === environmentFilter
   );
   const totalRestarts = filtered?.reduce((s, p) => s + p.restarts, 0) || 0;
+  const namespaceLabel = filtered?.[0]?.namespace || pods?.[0]?.namespace || "unknown";
 
   return (
     <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm p-6">
@@ -42,7 +43,7 @@ export default function PodHealth({ pods, isLoading, environmentFilter }: PodHea
             <Box className="h-4 w-4 text-primary" />
             Pod / Node Health
           </h3>
-          <p className="text-xs text-muted-foreground mt-0.5">AKS cluster — ns: devops-harness</p>
+          <p className="text-xs text-muted-foreground mt-0.5">AKS cluster — ns: {namespaceLabel}</p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="font-mono text-xs border-border/40">

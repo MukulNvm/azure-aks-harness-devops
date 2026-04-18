@@ -1,27 +1,41 @@
+# Dependencies
+node_modules/
 **/node_modules/
-**/build/
-npm-debug.log*
-.env
-.vscode/
-.DS_Store
 
+# Build outputs
+dist/
+build/
+**/dist/
+**/build/
+
+# Logs
+npm-debug.log*
+*.log
+crash.log
+
+# Environment variables
+.env
+.env.*
+.env.local
+.env.*.local
+
+# Terraform (all of it)
 terraform/.terraform/
 terraform/*.tfstate
 terraform/*.tfstate.*
 terraform/*.tfvars
 terraform/*.tfplan
+terraform/terraform.auto.tfvars
 terraform/crash.log
 
-terraform/terraform.tfstate
-terraform/terraform.tfstate.backup
-terraform/main.tfplan
-terraform/terraform.auto.tfvars
+# Secrets & credentials
+*.pem
+*.key
+delegate-token
+.harness/delegate-token
 harness-delegate.yml
 
-terraform/terraform.tfstate
-terraform/terraform.tfstate.backup
-terraform/main.tfplan
-terraform/terraform.auto.tfvars
-harness-delegate.yml
-node_modules/
-*.env
+# IDE and OS garbage
+.vscode/
+.DS_Store
+Thumbs.db

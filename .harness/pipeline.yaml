@@ -40,8 +40,8 @@ pipeline:
                     context: .
                     resources:
                       limits:
-                        cpu: "1"
-                        memory: 1Gi
+                        cpu: "500m"
+                        memory: 512Mi
               - step:
                   type: BuildAndPushDockerRegistry
                   name: build_frontend
@@ -55,8 +55,8 @@ pipeline:
                     context: .
                     resources:
                       limits:
-                        cpu: "1"
-                        memory: 1Gi
+                        cpu: "500m"
+                        memory: 512Mi
 
     - stage:
         name: CD

@@ -17,7 +17,7 @@ ENV BASE_PATH=/
 
 RUN pnpm install --no-frozen-lockfile
 WORKDIR /app/applications/frontend
-RUN NODE_OPTIONS="--max-old-space-size=3072" pnpm run build
+RUN PORT=4173 BASE_PATH=/ NODE_OPTIONS="--max-old-space-size=3072" pnpm run build
 
 FROM nginx:1.25-alpine
 COPY --from=builder /app/applications/frontend/dist/public /usr/share/nginx/html

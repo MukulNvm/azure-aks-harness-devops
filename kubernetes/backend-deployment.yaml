@@ -27,7 +27,7 @@ spec:
       serviceAccountName: backend-dashboard-reader
       containers:
         - name: backend
-          image: acrdevopsharnessy8v9wc.azurecr.io/backend:<+artifact.tag>
+          image: acrdevopsharnessy8v9wc.azurecr.io/backend:latest
           imagePullPolicy: Always
           env:
             - name: PORT

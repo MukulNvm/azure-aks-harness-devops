@@ -1,26 +1,5 @@
-FROM node:20-alpine AS builder
-WORKDIR /app
-
-RUN npm install -g pnpm
-
-COPY applications/frontend/ ./applications/frontend/
-COPY lib/api-client-react/ ./lib/api-client-react/
-
-RUN echo '{"name":"frontend-image-build","private":true,"packageManager":"pnpm@9.15.0"}' > package.json
-
-RUN printf 'packages:\n  - "applications/frontend"\n  - "lib/api-client-react"\ncatalog:\n  "@tailwindcss/vite": "4.2.2"\n  "@tanstack/react-query": "5.99.0"\n  "@types/node": "25.6.0"\n  "@types/react": "19.2.14"\n  "@types/react-dom": "19.2.3"\n  "@vitejs/plugin-react": "6.0.1"\n  "class-variance-authority": "0.7.1"\n  clsx: "2.1.1"\n  "framer-motion": "12.38.0"\n  "lucide-react": "1.8.0"\n  react: "19.2.5"\n  "react-dom": "19.2.5"\n  "tailwind-merge": "3.5.0"\n  tailwindcss: "4.2.2"\n  vite: "8.0.8"\n  zod: "4.3.6"\n' > pnpm-workspace.yaml
-
-RUN printf '{\n  "compilerOptions": {\n    "target": "ES2022",\n    "module": "ESNext",\n    "moduleResolution": "bundler",\n    "strict": true,\n    "skipLibCheck": true,\n    "esModuleInterop": true,\n    "allowSyntheticDefaultImports": true,\n    "resolveJsonModule": true,\n    "baseUrl": "."\n  }\n}\n' > tsconfig.base.json
-
-ENV PORT=4173
-ENV BASE_PATH=/
-
-RUN pnpm install --no-frozen-lockfile
-WORKDIR /app/applications/frontend
-RUN PORT=4173 BASE_PATH=/ NODE_OPTIONS="--max-old-space-size=3072" pnpm run build
-
 FROM nginx:1.25-alpine
-COPY --from=builder /app/applications/frontend/dist/public /usr/share/nginx/html
+COPY applications/frontend/dist/public /usr/share/nginx/html
 COPY applications/frontend/nginx.conf /etc/nginx/nginx.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

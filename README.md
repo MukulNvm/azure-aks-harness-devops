@@ -16,19 +16,19 @@ Live K8s observability with real cluster data.
 
 | KPI Dashboard | Latency Analytics |
 |---------------|-------------------|
-| ![Dashboard Overview](./screenshots/1-dashboard-overview.png) | ![Latency and Logs](./screenshots/2-latency-logs.png) |
+| ![Dashboard Overview](./Screenshots/1-dashboard-overview.png) | ![Latency and Logs](./Screenshots/2-latency-logs.png) |
 
 ### Infrastructure and Operations
 
 | Pod Health | User Directory |
 |------------|----------------|
-| ![Pod Health](./screenshots/3-pod-health.png) | ![User Directory](./screenshots/4-user-directory.png) |
+| ![Pod Health](./Screenshots/3-pod-health.png) | ![User Directory](./Screenshots/4-user-directory.png) |
 
 ### CI/CD Pipeline (Harness)
 
 | CD Pipeline Run | Pipeline Success |
 |-----------------|------------------|
-| ![Harness CD Run](./screenshots/5-harness-cd-run.png) | ![Harness Green](./screenshots/6-harness-pipeline-green.png) |
+| ![Harness CD Run](./Screenshots/5-harness-cd-run.png) | ![Harness Green](./Screenshots/6-harness-pipeline-green.png) |
 
 ## Why This Exists
 
